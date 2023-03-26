@@ -1,8 +1,8 @@
 # Nicoyomi
 
-![License](https://img.shields.io/github/license/enzious/nicoyomi)
+[![License](https://img.shields.io/github/license/enzious/nicoyomi)](https://github.com/enzious/nicoyomi/blob/main/LICENSE)
 [![Docker](https://img.shields.io/docker/pulls/enzious/nicoyomi)](https://hub.docker.com/r/enzious/nicoyomi)
-![Contributors](https://img.shields.io/github/contributors/enzious/nicoyomi)
+[![Contributors](https://img.shields.io/github/contributors/enzious/nicoyomi)](https://github.com/enzious/nicoyomi/graphs/contributors)
 
 A web server for browsing and downloading mangas to your Kindle library from your Kindle web browser.
 
