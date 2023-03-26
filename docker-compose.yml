@@ -1,0 +1,8 @@
+version: '3.7'
+
+services:
+  nicoyomi:
+    image: enzious/nicoyomi:latest
+    restart: always
+    ports:
+      - "127.0.0.1:6969:6969"

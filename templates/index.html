@@ -1,0 +1,66 @@
+{% include "common-style.html" %}
+{% include "scroll-top-anchor.html" %}
+
+<center>
+
+{% if query.len() == 0 %}
+  <br /><br />
+{% endif %}
+
+<h2>Nicoyomi</h2>
+
+<form action="" method="get" style="display: inline;">
+  <label>Manga Title Search</label><br />
+
+  <input name="query" type="text" value="{{ query }}" />
+
+  <input type="submit" value="Go" />
+</form>
+
+{% if query.len() != 0 %}
+  <form style="display: inline;" action="/" method="get">
+    <input type="submit" value="Reset">
+  </form>
+{% endif %}
+
+{% if query.len() == 0 %}
+  <div>
+    Backend powered by <a href="https://mangadex.org">MangaDex</a>
+  </div>
+{% endif %}
+
+</center>
+
+<br />
+
+<!-- <form action="downloads">
+  <input type="submit" value="My Downloads (0/0)" />
+</form> -->
+
+{% if query.len() != 0 %}
+<hr />
+
+<h3><strong>Results for:</strong> {{ query }}</h3>
+{% endif %}
+
+{% match mangas %}
+  {% when Some with (_mangas) %}
+    {% if _mangas.len() > 0 %}
+      {% include "scroll-bottom.html" %}
+
+      <!-- <br /><br /> -->
+
+      {% for manga in _mangas %}
+        {% let previous = "{}{}"|format("/?query="|urlencode, query|urlencode) %}
+        {% include "manga-item.html" %}
+      {% endfor %}
+
+      {% include "scroll-top.html" %}
+    {% endif %}
+  {% when None %}
+    {% if query.len() != 0 %}
+      No mangas found
+    {% endif %}
+{% endmatch %}
+
+{% include "scroll-bottom-anchor.html" %}

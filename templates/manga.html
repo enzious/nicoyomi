@@ -1,0 +1,198 @@
+{% include "common-style.html" %}
+{% include "scroll-top-anchor.html" %}
+
+<table style="width: 100%;">
+  <tr>
+    <td>
+      <button onclick="window.location.href = '/'">
+        Home
+      </button>
+
+      {% match previous %}
+        {% when Some with (_previous) %}
+          <button onclick="window.location.href = '{{ _previous }}'">
+            Back
+          </button>
+        {% when None %}
+      {% endmatch %}
+
+      {% match manga %}
+        {% when Some with (_manga) %}
+          {% let attributes = _manga.manga.attributes.borrow() %}
+
+          <h1 style="margin-bottom: 0;">
+            {{ attributes.get_title("en").unwrap_or("No title.") }}
+          </h1>
+
+          <p>
+            {{ attributes.get_description("en").unwrap_or("No description.") }}
+          </p>
+
+          {% match attributes.year %}
+            {% when Some with (year) %}
+              <strong>
+                Year:
+              </strong>
+
+              {{ year }} |
+            {% when None %}
+          {% endmatch %}
+
+          {% match attributes.publication_demographic %}
+            {% when Some with (publication_demographic) %}
+              <strong>
+                Demographic:
+              </strong>
+
+              {{ publication_demographic }} |
+            {% when None %}
+          {% endmatch %}
+
+          <strong>
+            Status:
+          </strong>
+
+          {{ attributes.status }}
+
+          <p>
+            <strong>Tags:</strong>
+
+            {% for tag in attributes.get_tags("en") -%}
+              {%- if !loop.first -%}
+                ,
+              {% endif %}
+              {{ tag -}}
+            {%- endfor %}
+          </p>
+
+          <!-- {% include "rating-stars.html" %} -->
+        {% when None %}
+      {% endmatch %}
+    </td>
+
+    {% match manga %}
+      {% when Some with (_manga) %}
+        {% match _manga.cover_art %}
+          {% when Some with (_cover) %}
+            <td style="width: 208px; padding-left: 8px;">
+              <a href="/cover/{{_cover}}">
+                <img style="max-width: 200px;" src="/cover/{{_cover}}" />
+              </a>
+            </td>
+          {% when None %}
+        {% endmatch %}
+      {% when None %}
+    {% endmatch %}
+  </tr>
+</table>
+
+{% match manga %}
+  {% when Some with (_manga) %}
+    <h2>
+      Volumes -
+      {% match volumes %}
+        {% when Some with (_volumes) %}
+          {{ _volumes.count() }}
+        {% when None %}
+          0
+      {% endmatch %}
+      total
+    </h2>
+
+    {% match volumes %}
+      {% when Some with (_volumes) %}
+        <select id="volume-select" onchange="handleValueChange()" style="width: 100%;">
+          {% for volume in _volumes.get_ordered_volumes() %}
+            <option value="{{ volume.volume }}">Volume {{ volume.volume }}</option>
+          {% endfor %}
+        </select>
+      {% when None %}
+    {% endmatch %}
+
+    {% match volumes %}
+      {% when Some with (_volumes) %}
+        {% include "scroll-bottom.html" %}
+
+        {% for volume in _volumes.get_ordered_volumes() %}
+          <section id="volume-{{ volume.volume }}" style="display: none;">
+            {% if loop.first %}
+              <script type="text/javascript">
+                var firstVolume = '{{ volume.volume }}';
+              </script>
+            {% endif %}
+
+            <h3>
+              Volume {{ volume.volume }}
+            </h3>
+
+            {% for chapter in volume.chapters %}
+              <div>
+                <button onclick="window.location.href = '/download/chapter/{{ chapter.id }}/{{ _manga.manga.attributes.get_link_title("en").unwrap_or(chapter.id.to_owned()) }}/{{ chapter.chapter }}'">Download</button>
+
+                <h2 style="display: inline;">
+                  <a href="https://mangadex.org/chapter/{{ chapter.id }}" target="_blank">
+                    Chapter {{ chapter.chapter }}
+                  </a>
+                </h2>
+              </div>
+            {% endfor %}
+          </section>
+        {% endfor %}
+
+        <br />
+
+        {% include "scroll-top.html" %}
+      {% when None %}
+        No volumes found
+    {% endmatch %}
+
+    {% include "scroll-bottom-anchor.html" %}
+  {% when None %}
+    <br />No manga found
+{% endmatch %}
+
+<script type="text/javascript">
+  var ignoreNextHash = false;
+
+  function selectVolume(volume, silent, setHash) {
+    var previousElement = document.getElementsByClassName('selected-volume');
+    if (previousElement.length) {
+      previousElement[0].style.display = 'none';
+      previousElement[0].className = '';
+    }
+
+    var selectedElement = document.getElementById('volume-' + volume);
+    selectedElement.style.display = 'block';
+    selectedElement.className = 'selected-volume';
+
+    document.getElementById('volume-select').value = volume;
+
+    if (setHash !== false) {
+      ignoreNextHash = silent;
+      window.location.hash = volume;
+    }
+  }
+
+  function handleValueChange() {
+    var selected = document.getElementById('volume-select').value;
+
+    selectVolume(selected);
+  }
+
+  function handleHash() {
+    var hash = window.location.hash;
+
+    if (!ignoreNextHash) {
+      if (hash !== '') {
+        selectVolume(hash.substr(1), true, false);
+      } else {
+        selectVolume(firstVolume, true, false);
+      }
+    }
+
+    ignoreNextHash = false;
+  }
+
+  window.addEventListener('hashchange', handleHash);
+  window.addEventListener("DOMContentLoaded", handleHash);
+</script>

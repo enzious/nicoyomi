@@ -1,0 +1,11 @@
+<button onclick="history.back()">
+  Back
+</button>
+
+<br />
+
+<h2>Your Downloads</h2>
+
+{% if downloads.len() == 0 %}
+  You currently do not have any downloads
+{% endif %}

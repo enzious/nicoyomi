@@ -1,0 +1,54 @@
+<h3 style="margin: 0;">
+  <div
+    style="text-decoration: none; display: block; border: 1px solid #000000; padding: 1rem; margin-bottom: .5rem; width: 100%; cursor: pointer;"
+    onclick="window.location.href = '/manga/{{ manga.manga.id }}?prev={{ previous }}'"
+  >
+    {% let attributes = manga.manga.attributes.borrow() %}
+
+    <a
+      style="text-decoration: underline;"
+      href="/manga/{{ manga.manga.id }}?prev={{ previous }}"
+    >
+      {{ attributes.get_title("en").unwrap_or("No title.") }}
+    </a>
+
+    <div style="text-decoration: none;">
+      {% match attributes.year %}
+        {% when Some with (year) %}
+          <strong>
+            Year:
+          </strong>
+
+          {{ year }} |
+        {% when None %}
+      {% endmatch %}
+
+      {% match attributes.publication_demographic %}
+        {% when Some with (publication_demographic) %}
+          <strong>
+            Demographic:
+          </strong>
+
+          {{ publication_demographic }} |
+        {% when None %}
+      {% endmatch %}
+
+      <strong>
+        Status:
+      </strong>
+
+      {{ attributes.status }}
+
+      <div>
+        <strong>Tags:</strong>
+
+        {% for tag in attributes.get_tags("en") -%}
+          {%- if !loop.first -%}
+            ,
+          {% endif %}
+          {{ tag -}}
+        {%- endfor %}
+      </div>
+    </div>
+  </div>
+</h3>
