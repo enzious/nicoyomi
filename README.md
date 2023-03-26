@@ -22,6 +22,18 @@ xdg-open http://localhost:6969
 - Docker
 - Internet access
 
+## Troubleshooting
+1. Why doesn't Nicoyomi work on my Kindle when I host it with TSL/SSL?
+   - Try using HTTP instead of HTTPS, or use an older TLS/SSL standard. You may have an older Kindle web browser.
+2. Why do some mangas and chapters fail to download while others succeed?
+   - There are some mangas listed that MangaDex doesn't actually host but instead redirects to a licensees domain. These will fail, I'll have to figure that out when I have time.
+3. What is this "none" volume I'm seeing on some mangas?
+   - That is a "fake" volume for chapters that do not have a volume. This could be because there just isn't a volume, or the chapter is new and hasn't been grouped into a volume.
+4. I have an idea for a feature, where should I send it?
+   - Open an [issue](https://github.com/enzious/nicoyomi/issues/new)! This was a very fun 5-day project and I'm still wanting to add more features.
+5. Why?
+   - Idk, writing Rust is fun and manga on the Kindle is really comfy.
+
 ## Supported by the great work of following projects!
 - [MangaDex.org](https://mangadex.org)
 - [mangadex-downloader](https://github.com/mansuf/mangadex-downloader)
