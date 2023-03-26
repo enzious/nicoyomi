@@ -71,6 +71,8 @@ COPY rustfmt.toml .
 COPY src src
 COPY templates templates
 
+RUN rm -rf ./target/x86_64-unknown-linux-musl/release/.fingerprint/nicoyomi*
+
 RUN cargo install --path .
 
 # FINAL

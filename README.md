@@ -25,5 +25,9 @@ xdg-open http://localhost:6969
 ## Todo
 - Internal cron job for file clean-up
 - Account access
-- Chapter titles and metadata
+- Display chapter titles and metadata
 - Improved navigation and discovery
+- Get the Docker image size down (1.5GB! Curse you Qt!)
+- Bring the image retrieval and ebook generation into a Rust library
+  - Might be hard to generate ebooks
+- Include chapter in title or something visible for easy identification in library
