@@ -69,13 +69,13 @@ impl MangadexService {
       .send()
       .await
       .map_err(|err| {
-        println!("Failed to get cover: {:?}", &err);
+        error!("Failed to get cover: {:?}", &err);
         err
       })?
       .body()
       .await
       .map_err(|err| {
-        println!("Failed to read cover response: {:?}", &err);
+        error!("Failed to read cover response: {:?}", &err);
         err
       })?;
 

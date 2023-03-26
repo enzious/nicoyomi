@@ -35,13 +35,13 @@ pub async fn cover(
           .write(true)
           .open(&cover_path)
           .map_err(|err| {
-            println!("Failed to save cover: {:?}", &err);
+            error!("Failed to save cover: {:?}", &err);
 
             err
           })?;
 
         file.write_all(&bytes).map_err(|err| {
-          println!("Failed to write cover: {:?}", &err);
+          error!("Failed to write cover: {:?}", &err);
 
           err
         })?;

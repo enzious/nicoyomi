@@ -70,7 +70,7 @@ impl MangadexService {
     drop(semaphore);
 
     let res = serde_json::from_slice::<MangadexResponse<Manga>>(&res[..]).map_err(|err| {
-      println!("Failed to parse json response: {:?}", &err);
+      error!("Failed to parse json response: {:?}", &err);
 
       err
     })?;
