@@ -93,27 +93,23 @@ impl MangadexService {
 
       let mut stream = self.download_cover(&manga_id, &filename).await?;
 
-      {
-        let cover_path = cover_path.to_path_buf();
+      let mut file = tokio::fs::OpenOptions::new()
+        .create(true)
+        .truncate(true)
+        .write(true)
+        .open(&cover_path)
+        .await
+        .map_err(|err| {
+          error!("Failed to save cover: {:?}", &err);
 
-        let mut file = tokio::fs::OpenOptions::new()
-          .create(true)
-          .truncate(true)
-          .write(true)
-          .open(&cover_path)
-          .await
-          .map_err(|err| {
-            error!("Failed to save cover: {:?}", &err);
+          err
+        })?;
 
-            err
-          })?;
+      while let Some(chunk) = stream.next().await {
+        if let Err(err) = file.write_all(&(chunk?)[..]).await {
+          let _ = tokio::fs::remove_dir_all(cover_dir).await;
 
-        while let Some(chunk) = stream.next().await {
-          if let Err(err) = file.write_all(&(chunk?)[..]).await {
-            let _ = tokio::fs::remove_dir_all(cover_dir).await;
-
-            return Ok(Err(err)?);
-          }
+          return Ok(Err(err)?);
         }
       }
     }
