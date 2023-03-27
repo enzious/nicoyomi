@@ -7,8 +7,10 @@ use futures::lock::Mutex;
 use lazy_static::lazy_static;
 use thiserror::Error;
 use tokio::sync::{AcquireError, SemaphorePermit};
+use tokio::task::JoinError;
 use tokio::time::{sleep, Sleep};
 
+pub mod chapter;
 pub mod cover;
 pub mod manga;
 pub mod volume;
@@ -29,12 +31,12 @@ lazy_static! {
   static ref SEMAPHORE: tokio::sync::Semaphore = tokio::sync::Semaphore::new(*PERMITS_PER_SECOND);
 }
 
-pub struct MangadexSemaphore<'a> {
+pub struct MangadexPermit<'a> {
   sleep: Option<Sleep>,
   permit: Option<SemaphorePermit<'a>>,
 }
 
-impl<'a> MangadexSemaphore<'a> {
+impl<'a> MangadexPermit<'a> {
   pub fn new(permit: SemaphorePermit<'a>) -> Self {
     Self {
       sleep: Some(sleep(Duration::from_secs(1))),
@@ -43,7 +45,7 @@ impl<'a> MangadexSemaphore<'a> {
   }
 }
 
-impl<'a> Drop for MangadexSemaphore<'a> {
+impl<'a> Drop for MangadexPermit<'a> {
   fn drop(&mut self) {
     if let Some(sleep) = self.sleep.take() {
       let permit = self.permit.take();
@@ -66,8 +68,8 @@ pub struct MangadexService {
 }
 
 impl MangadexService {
-  pub async fn lock_semaphore<'a>() -> Result<MangadexSemaphore<'a>, MangadexServiceError> {
-    Ok(MangadexSemaphore::new(SEMAPHORE.acquire().await?))
+  pub async fn acquire_permit<'a>() -> Result<MangadexPermit<'a>, MangadexServiceError> {
+    Ok(MangadexPermit::new(SEMAPHORE.acquire().await?))
   }
 }
 
@@ -118,6 +120,10 @@ pub enum MangadexServiceError {
   ChapterDownloadError,
   #[error("internal error")]
   InternalError,
+  #[error("io error")]
+  IoError(#[from] std::io::Error),
+  #[error("join error")]
+  JoinError(#[from] JoinError),
   #[error("failed to retrieve payload")]
   PayloadError(#[from] PayloadError),
   #[error("failed to acquire semaphore")]

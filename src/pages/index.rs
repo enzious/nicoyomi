@@ -13,12 +13,12 @@ struct IndexTemplate {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct SearchQuery {
+pub(super) struct SearchQuery {
   query: Option<String>,
 }
 
 #[get("/")]
-pub async fn index(
+pub(super) async fn index(
   web::Query(SearchQuery { query }): web::Query<SearchQuery>,
   mangadex: web::Data<MangadexService>,
 ) -> Result<HttpResponse, Error> {

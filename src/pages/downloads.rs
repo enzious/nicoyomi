@@ -9,7 +9,7 @@ struct DownloadsTemplate {
 }
 
 #[get("/downloads")]
-pub async fn downloads() -> Result<HttpResponse, Error> {
+pub(super) async fn downloads() -> Result<HttpResponse, Error> {
   Ok(
     DownloadsTemplate {
       // active_downloads: vec![],

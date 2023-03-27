@@ -18,13 +18,13 @@ struct MangaTemplate {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct MangaQuery {
+pub(super) struct MangaQuery {
   #[serde(rename = "prev")]
   previous: Option<String>,
 }
 
 #[get("/manga/{manga_id}")]
-pub async fn manga(
+pub(super) async fn manga(
   path: web::Path<(String,)>,
   web::Query(MangaQuery { previous }): web::Query<MangaQuery>,
   mangadex: web::Data<MangadexService>,

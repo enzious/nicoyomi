@@ -14,7 +14,7 @@ impl MangadexService {
     &self,
     id: &str,
   ) -> Result<Option<MangaWithCoverArt>, MangadexServiceError> {
-    let semaphore = Self::lock_semaphore().await?;
+    let semaphore = Self::acquire_permit().await?;
 
     let res = self
       .client
@@ -56,7 +56,7 @@ impl MangadexService {
     &self,
     title: &str,
   ) -> Result<Vec<MangaWithCoverArt>, MangadexServiceError> {
-    let semaphore = Self::lock_semaphore().await?;
+    let semaphore = Self::acquire_permit().await?;
 
     let res = self
       .client

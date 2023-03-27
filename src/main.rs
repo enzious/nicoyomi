@@ -6,11 +6,11 @@ extern crate slog;
 use actix_files::Files;
 use actix_web::web;
 use actix_web::{App, HttpServer};
-use pages::cover::cover;
-use pages::download::download_chapter;
-use pages::downloads::downloads;
-use pages::index::index;
-use pages::manga::manga;
+use pages::cover;
+use pages::download_chapter;
+use pages::downloads;
+use pages::index;
+use pages::manga;
 use services::mangadex::MangadexService;
 
 mod dto;
@@ -25,7 +25,7 @@ async fn main() -> Result<(), std::io::Error> {
 
   let mangadex = MangadexService::builder();
 
-  std::fs::create_dir_all("./public").unwrap();
+  std::fs::create_dir_all("./public").expect("failed to create public folder");
 
   HttpServer::new(move || {
     let mangadex = mangadex.to_owned();

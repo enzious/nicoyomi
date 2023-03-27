@@ -16,7 +16,7 @@ impl MangadexService {
       &manga_id
     );
 
-    let semaphore = Self::lock_semaphore().await?;
+    let semaphore = Self::acquire_permit().await?;
 
     let res = self.client.get(uri).send().await?.body().await?;
 

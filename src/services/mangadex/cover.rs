@@ -1,7 +1,11 @@
 use std::collections::HashMap;
 
+use actix_web::Responder;
+use awc::error::PayloadError;
 use bytes::Bytes;
+use futures::{Stream, StreamExt};
 use serde::{Deserialize, Serialize};
+use tokio::io::AsyncWriteExt;
 
 use crate::dto::mangadex::{Manga, MangadexResponse, Relationship};
 
@@ -25,7 +29,7 @@ impl MangadexService {
       )
     );
 
-    let semaphore = Self::lock_semaphore().await?;
+    let semaphore = Self::acquire_permit().await?;
 
     let res = self.client.get(uri).send().await?.body().await?;
 
@@ -54,34 +58,67 @@ impl MangadexService {
       .collect()
   }
 
-  pub async fn download_cover_art(
+  pub async fn download_cover(
     &self,
     manga_id: &str,
     filename: &str,
-  ) -> Result<Bytes, MangadexServiceError> {
+  ) -> Result<impl Stream<Item = Result<Bytes, PayloadError>>, MangadexServiceError> {
     let uri = format!("https://mangadex.org/covers/{}/{}", manga_id, filename);
 
-    let semaphore = Self::lock_semaphore().await?;
+    let semaphore = Self::acquire_permit().await?;
 
-    let res = self
-      .client
-      .get(uri)
-      .send()
-      .await
-      .map_err(|err| {
-        error!("Failed to get cover: {:?}", &err);
-        err
-      })?
-      .body()
-      .await
-      .map_err(|err| {
-        error!("Failed to read cover response: {:?}", &err);
-        err
-      })?;
+    let res = self.client.get(uri).send().await;
 
     drop(semaphore);
 
-    Ok(res)
+    Ok(res.map_err(|err| {
+      error!("Failed to get cover: {:?}", &err);
+      err
+    })?)
+  }
+
+  pub async fn download_cover_response(
+    &self,
+    manga_id: &str,
+    filename: &str,
+  ) -> Result<impl Responder, MangadexServiceError> {
+    let cover_path_str = format!("cover/{}/{}", &manga_id, &filename);
+    let cover_path = std::path::Path::new(&cover_path_str);
+
+    if !cover_path.exists() {
+      info!("Downloading cover...");
+
+      let cover_dir = format!("cover/{}", &manga_id);
+      tokio::fs::create_dir_all(&cover_dir).await?;
+
+      let mut stream = self.download_cover(&manga_id, &filename).await?;
+
+      {
+        let cover_path = cover_path.to_path_buf();
+
+        let mut file = tokio::fs::OpenOptions::new()
+          .create(true)
+          .truncate(true)
+          .write(true)
+          .open(&cover_path)
+          .await
+          .map_err(|err| {
+            error!("Failed to save cover: {:?}", &err);
+
+            err
+          })?;
+
+        while let Some(chunk) = stream.next().await {
+          if let Err(err) = file.write_all(&(chunk?)[..]).await {
+            let _ = tokio::fs::remove_dir_all(cover_dir).await;
+
+            return Ok(Err(err)?);
+          }
+        }
+      }
+    }
+
+    Ok(actix_files::NamedFile::open(cover_path)?)
   }
 }
 
