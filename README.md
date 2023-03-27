@@ -49,3 +49,4 @@ xdg-open http://localhost:6969
   - Might be hard to generate ebooks
 - Include chapter in title or something visible for easy identification in library
 - Improve error handling and logging
+- Add volume covers to chapter ebooks
